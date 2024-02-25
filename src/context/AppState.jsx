@@ -36,11 +36,11 @@ export default function AppState(props) {
             setloading(false)
             navigate("/verifyOtp")
         } catch (error) {
+            console.log(error);
             const err=error.request.response
             const msg=err.substring(err.indexOf("Error: "),err.indexOf("<br>"))
             alert.error(msg)
             setloading(false)
-            // console.log(msg);
         }
     }
 
@@ -56,11 +56,11 @@ export default function AppState(props) {
             setloading(false)
             navigate("/verifyOtp")
         } catch (error) {
+            console.log(error);
             const err=error.request.response
             const msg=err.substring(err.indexOf("Error: "),err.indexOf("<br>"))
             alert.error(msg)
             setloading(false)
-            // console.log(error);
         }
     }
 
