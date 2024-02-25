@@ -10,12 +10,14 @@ function Jobs() {
     const { coinsEarned, setCoinsEarned, appliedJobs,getJobs, allJobs } = useContext(appContext)
     const { setshowSidebar } = useContext(appContext)
     const [loader, setloader] = useState(true)
-    setshowSidebar(true)
     const navigate = useNavigate()
     useEffect(() => {
+        setshowSidebar(true)
         navigate("/jobs")
+        console.log("here");
         const func=async()=>{
             await getJobs()
+            console.log("here3");
             await appliedJobs()
             setloader(false)
         }

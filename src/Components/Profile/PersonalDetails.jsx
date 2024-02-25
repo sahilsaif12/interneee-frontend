@@ -21,7 +21,7 @@ function PersonalDetails({ coins, setCoins, details }) {
     const [resumeDisable, setresumeDisable] = useState(false);
     const [saving, setsaving] = useState(false);
 
-    const {loading,setloading,updateCoins}=useContext(appContext)
+    const {loading,setloading,updateCoins,server}=useContext(appContext)
 
     const alert=useAlert()
     const ref = useRef('')
@@ -100,10 +100,12 @@ function PersonalDetails({ coins, setCoins, details }) {
         try {
             setloading(true)
             setsaving(true)
-            const res =await axios.patch("/v1/update/personal",formData,{
+            const res =await axios.patch(`${server}/v1/update/personal`,formData,{
                 headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${Cookies.get("accessToken")}`,
+                },
+                
             })
             const data=res.data.data
             setdata(data)

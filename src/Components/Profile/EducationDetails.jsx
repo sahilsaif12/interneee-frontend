@@ -27,7 +27,7 @@ function EducationDetails({coins,setCoins,details}) {
     const [saving, setsaving] = useState(false);
 
 
-    const {loading,setloading,updateCoins} = useContext(appContext)
+    const {loading,setloading,updateCoins,server} = useContext(appContext)
     const alert=useAlert()
 
 
@@ -86,7 +86,11 @@ function EducationDetails({coins,setCoins,details}) {
         try {
             setloading(true)
             setsaving(true)
-            const res =await axios.patch("/v1/update/educational",updatedFields)
+            const res =await axios.patch(`${server}/v1/update/educational`,updatedFields,{
+                headers: {
+                    'Authorization': `Bearer ${Cookies.get("accessToken")}`,
+                },
+            })
             const data=res.data.data
             setdata(data)
             setloading(false)

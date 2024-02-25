@@ -6,21 +6,28 @@ import Cookies from "js-cookie";
 
 const PrivateRoute = ({ Component }) => {
 
-  // const {validateTokens}=useContext(appContext)
+  const {server}=useContext(appContext)
   const [validToken, setvalidToken] = useState(false);
   const navigate = useNavigate()
   useEffect(() => {
     async function validateTokens() {
       // You can await here
       try {
-        const res = await axios.get("v1/users/refreshAccessToken")
-        const success = res.data.success
-        if (success) {
-          setvalidToken(true)
-          // console.log(Cookies.get('refreshToken'));
-
-          // return true
-        }
+        console.log("here");
+        let refreshToken=Cookies.get('refreshToken');
+        console.log(refreshToken);
+        const res = await axios.get(`${server}/v1/users/refreshAccessToken`,
+        {
+          headers: {
+              'Authorization': `Bearer ${refreshToken}`,
+            }
+        },
+        )
+        const data =res.data.data
+        Cookies.set('accessToken',data.accessToken);
+        Cookies.set('refreshToken',data.refreshToken);
+        setvalidToken(true)
+        
       } catch (error) {
         setvalidToken(false)
         // return false;

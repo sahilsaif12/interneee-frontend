@@ -15,7 +15,7 @@ const ProfilePage = () => {
     const [prevExEdited, setprevExEdited] = useState(false);
     const{email,fullName,experience_details,personal_details,educational_details,project_details}=allDetails
     const {setshowSidebar,setsidebarToggle,setactive}=useContext(appContext)
-    setshowSidebar(true)
+    
     // const navigate=useNavigate()
 
     // const handleChange = (e, setField, coins) => {
@@ -35,6 +35,7 @@ const ProfilePage = () => {
     }, [experience_details])
     
     useEffect(() => {
+        setshowSidebar(true)
       userDetails()
     }, [])
     

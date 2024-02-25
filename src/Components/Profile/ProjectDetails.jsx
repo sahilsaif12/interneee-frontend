@@ -75,7 +75,11 @@ function ProjectDetails({coins,setCoins,details}) {
         try {
             setloading(true)
             setsaving(true)
-            const res =await axios.patch("/v1/update/project",updatedFields)
+            const res =await axios.patch(`${server}/v1/update/project`,updatedFields,{
+                headers: {
+                    'Authorization': `Bearer ${Cookies.get("accessToken")}`,
+                }
+            })
             const data=res.data.data
             setdata(data)
             setloading(false)

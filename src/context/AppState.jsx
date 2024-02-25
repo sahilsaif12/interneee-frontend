@@ -5,6 +5,7 @@ import axios from "axios";
 import { useAlert } from "react-alert";
 import Cookies from "js-cookie"
 
+
 export default function AppState(props) {
 
 
@@ -20,16 +21,18 @@ export default function AppState(props) {
     const [allJobs, setallJobs] = useState([]);
     const [allAppliedJobs, setallAppliedJobs] = useState([]);
     const navigate = useNavigate()
-    const alert=useAlert()
+    const alert = useAlert()
 
+    const server="https://interneee-backend.vercel.app/api"
+    // const server = "http://localhost:8000/api"
 
     const register = async (email, fullName) => {
         try {
             setloading(true);
-            const res = await axios.post("v1/users/register", {
+            const res = await axios.post(`${server}/v1/users/register`, {
                 email, fullName
             })
-            const data=res.data.data
+            const data = res.data.data
             // console.log(res.data);
             setOtp(data.otp)
             setuserId(data.createdUser._id)
@@ -37,38 +40,43 @@ export default function AppState(props) {
             navigate("/verifyOtp")
         } catch (error) {
             console.log(error);
-            const err=error.request.response
-            const msg=err.substring(err.indexOf("Error: "),err.indexOf("<br>"))
+            const err = error.request.response
+            const msg = err.substring(err.indexOf("Error: "), err.indexOf("<br>"))
             alert.error(msg)
             setloading(false)
         }
     }
 
     const login = async (email) => {
+        console.log(server);
         try {
             setloading(true);
-            const res = await axios.post("v1/users/login", {
+            const res = await axios.post(`${server}/v1/users/login`, {
                 email
             })
-            const data=res.data.data
+            const data = res.data.data
             setOtp(data.otp)
             setuserId(data.user._id)
             setloading(false)
             navigate("/verifyOtp")
         } catch (error) {
             console.log(error);
-            const err=error.request.response
-            const msg=err.substring(err.indexOf("Error: "),err.indexOf("<br>"))
+            const err = error.request.response
+            const msg = err.substring(err.indexOf("Error: "), err.indexOf("<br>"))
             alert.error(msg)
             setloading(false)
         }
     }
 
-    const logout=async()=>{
+    const logout = async () => {
         try {
             setloading(true)
-            const res = await axios.get("/v1/users/logout",{},{ withCredentials: "include" })
-            const success =await res.data.success
+            const res = await axios.get(`${server}/v1/users/logout`,{
+                headers: {
+                    'Authorization': `Bearer ${Cookies.get("accessToken")}`,
+                }
+            })
+            const success = await res.data.success
             if (success) {
                 navigate("/")
                 // console.log(Cookies.get('accessToken'));
@@ -81,14 +89,16 @@ export default function AppState(props) {
             console.log(error);
         }
     }
-    
+
     const userVerifed = async (id) => {
         try {
-            const res = await axios.post("v1/users/userVerified", {
+            const res = await axios.post(`${server}/v1/users/userVerified`, {
                 id
             })
-            // console.log(Cookies.get('accessToken'));
-            return true
+            const data = res.data
+            console.log(res.data);
+            Cookies.set('accessToken', data.accessToken);
+            Cookies.set('refreshToken', data.refreshToken);
         } catch (error) {
             // const err=error.request.response
             // const msg=err.substring(err.indexOf("Error: "),err.indexOf("<br>"))
@@ -98,30 +108,15 @@ export default function AppState(props) {
         }
     }
 
-    const validateTokens = async () => {
-        // setvalidToken(false)
-        try {
-            const res = await axios.get("v1/users/refreshAccessToken")
-            const success=res.data.success
-            if (success) {
-                setvalidToken(true)
-            }
-        } catch (error) {
-            setvalidToken(false)
-            // return false;
-            const err=error.request.response
-            const msg=err.substring(err.indexOf("Error: "),err.indexOf("<br>"))
-            alert.error(msg)
-            // setloading(false)
-            // console.log(error);
-        }
-    }
-
-    const userDetails=async()=>{
+    const userDetails = async () => {
         setloading(true)
         try {
-            const res = await axios.get("v1/users/userDetails")
-            const data =res.data.data
+            const res = await axios.get(`${server}/v1/users/userDetails`,{
+                headers: {
+                    'Authorization': `Bearer ${Cookies.get("accessToken")}`,
+                },
+            })
+            const data = res.data.data
             setallDetails(data)
             setCoinsEarned(data.coins)
             setallAppliedJobs(data.applied_jobs)
@@ -131,12 +126,16 @@ export default function AppState(props) {
         }
     }
 
-    const updateCoins=async(newCoins, op)=>{
+    const updateCoins = async (newCoins, op) => {
         try {
-            const res = await axios.patch("v1/users/updateCoins",{
-                newCoins,op
-            })
-            const data =res.data.data
+            const res = await axios.patch(`${server}/v1/users/updateCoins`,
+                { newCoins, op },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${Cookies.get("accessToken")}`,
+                    },
+                })
+            const data = res.data.data
             setCoinsEarned(data.CurrentCoins)
         } catch (error) {
             console.log(error);
@@ -144,25 +143,35 @@ export default function AppState(props) {
     }
 
 
-    const getJobs=async(page=1)=>{
+    const getJobs = async (page = 1) => {
         try {
-            const res = await axios.get("v1/jobs/allJobs",{
-                params:{page}
+            console.log("here2");
+            const res = await axios.get(`${server}/v1/jobs/allJobs`, {
+                headers: {
+                    'Authorization': `Bearer ${Cookies.get("accessToken")}`,
+                },
+                params: { page }
             })
-            const data =res.data.data
+            console.log("here 2");
+            const data = res.data.data
+            console.log(data);
             setallJobs(data)
         } catch (error) {
             console.log(error);
         }
     }
 
-    const applyJob=async(jobId)=>{
+    const applyJob = async (jobId) => {
         setloading(true)
         try {
-            const res = await axios.patch(`v1/jobs/applyJob/${jobId}`)
-            if(res.data.success){
-                setallAppliedJobs((prev)=>[...prev,res.data.data])
-                updateCoins(50,"dec")
+            const res = await axios.patch(`${server}/v1/jobs/applyJob/${jobId}`, {
+                headers: {
+                    'Authorization': `Bearer ${Cookies.get("accessToken")}`,
+                }
+            })
+            if (res.data.success) {
+                setallAppliedJobs((prev) => [...prev, res.data.data])
+                updateCoins(50, "dec")
                 setloading(false)
                 alert.success("Applied ✔")
             }
@@ -172,10 +181,14 @@ export default function AppState(props) {
         }
     }
 
-    const appliedJobs=async()=>{
+    const appliedJobs = async () => {
         try {
-            const res = await axios.get("v1/jobs/appliedJobs")
-            const data=res.data.data
+            const res = await axios.get(`${server}/v1/jobs/appliedJobs`, {
+                headers: {
+                    'Authorization': `Bearer ${Cookies.get("accessToken")}`,
+                }
+            })
+            const data = res.data.data
             console.log(data);
             setCoinsEarned(data.coins)
             setallAppliedJobs(data.applied_jobs)
@@ -186,7 +199,7 @@ export default function AppState(props) {
         }
     }
 
-    
+
     return (
         <AppContext.Provider value={{
             coinsEarned,
@@ -198,7 +211,7 @@ export default function AppState(props) {
             setsidebarToggle,
             active,
             setactive,
-            generatedOtp:otp,
+            generatedOtp: otp,
             loading,
             setloading,
             register,
@@ -207,7 +220,6 @@ export default function AppState(props) {
             logout,
             login,
             validToken,
-            validateTokens,
             allDetails,
             setallDetails,
             userDetails,
@@ -216,7 +228,8 @@ export default function AppState(props) {
             allJobs,
             applyJob,
             appliedJobs,
-            allAppliedJobs
+            allAppliedJobs,
+            server
         }}>
             {props.children}
         </AppContext.Provider>
